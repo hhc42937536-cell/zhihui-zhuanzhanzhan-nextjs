@@ -1,164 +1,151 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { useMemo, useState } from "react";
+import { PAIN_POINTS, type PainPoint } from "@/lib/mock-data";
 
-const CATEGORIES = ['工作', '生活', '學習', '健康', '人際', '其他'];
-
-const CATEGORY_COLORS: Record<string, string> = {
-  工作: 'bg-orange-100 text-orange-700',
-  生活: 'bg-yellow-100 text-yellow-700',
-  學習: 'bg-blue-100 text-blue-700',
-  健康: 'bg-green-100 text-green-700',
-  人際: 'bg-purple-100 text-purple-700',
-  其他: 'bg-gray-100 text-gray-700',
-};
-
-interface PainPoint {
-  id: string;
-  title: string;
-  content: string;
-  category: string;
-  likes: number;
-  user_id: string;
-}
+const categories = ["全部", "投資", "工作", "生活", "創業", "自動化", "AI創作"] as const;
+type CategoryFilter = (typeof categories)[number];
+type SortMode = "熱門" | "最新";
 
 export default function PainPointHubPage() {
-  const supabase = createClient();
-  const [user, setUser] = useState<any>(null);
-  const [painPoints, setPainPoints] = useState<PainPoint[]>([]);
-  const [form, setForm] = useState({ title: '', content: '', category: '工作' });
-  const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState('');
+  const [category, setCategory] = useState<CategoryFilter>("全部");
+  const [sortMode, setSortMode] = useState<SortMode>("熱門");
+  const [search, setSearch] = useState("");
+  const [tag, setTag] = useState("");
+  const [formCategory, setFormCategory] = useState<PainPoint["category"]>("工作");
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
-    fetchPainPoints();
-  }, []);
-
-  async function fetchPainPoints() {
-    const { data } = await supabase
-      .from('pain_points')
-      .select('*')
-      .order('likes', { ascending: false });
-    if (data) setPainPoints(data);
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!user) return setMessage('請先登入');
-    setSubmitting(true);
-    const { error } = await supabase.from('pain_points').insert({
-      ...form,
-      user_id: user.id,
-      likes: 0,
-    });
-    if (!error) {
-      await supabase.rpc('increment_pain_coins', { user_id: user.id, amount: 20 });
-      setForm({ title: '', content: '', category: '工作' });
-      setMessage('✅ 痛點已提交！獲得 20 痛痛幣');
-      fetchPainPoints();
-    } else {
-      setMessage('提交失敗：' + error.message);
-    }
-    setSubmitting(false);
-  }
-
-  async function handleLike(id: string) {
-    if (!user) return setMessage('請先登入才能按讚');
-    await supabase.rpc('increment_pain_point_likes', { point_id: id });
-    fetchPainPoints();
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-orange-50 flex items-center justify-center">
-        <div className="bg-white rounded-xl shadow-sm p-8 text-center">
-          <p className="text-gray-600 mb-4">請先登入以使用痛點中心</p>
-          <a href="/login" className="bg-orange-500 text-white px-6 py-2 rounded-xl hover:bg-orange-600">
-            前往登入
-          </a>
-        </div>
-      </div>
+  const filtered = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+    return PAIN_POINTS.filter((item) => {
+      const matchCategory = category === "全部" || item.category === category;
+      const matchTag = !tag || item.tags.includes(tag);
+      const matchSearch =
+        !keyword ||
+        item.title.toLowerCase().includes(keyword) ||
+        item.description.toLowerCase().includes(keyword) ||
+        item.poster.toLowerCase().includes(keyword) ||
+        item.tags.some((itemTag) => itemTag.toLowerCase().includes(keyword));
+      return matchCategory && matchTag && matchSearch;
+    }).sort((a, b) =>
+      sortMode === "熱門"
+        ? b.likes + b.comments - (a.likes + a.comments)
+        : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
-  }
+  }, [category, search, sortMode, tag]);
+
+  const selectTag = (nextTag: string) => {
+    setTag(nextTag === tag ? "" : nextTag);
+    setCategory("全部");
+  };
 
   return (
-    <div className="min-h-screen bg-orange-50 py-10 px-4">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold text-orange-600 mb-8">💬 痛點中心</h1>
+    <main className="min-h-screen bg-stone-50 px-4 py-8 text-stone-900">
+      <section className="mx-auto max-w-6xl">
+        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-orange-600">痛點交換所</p>
+            <h1 className="mt-2 text-3xl font-bold">把卡住的流程變成可解決的任務</h1>
+          </div>
+          <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            發布痛點 +20 痛痛幣，回覆有效解法 +50 智慧幣。
+          </div>
+        </div>
 
-        {/* Submit Form */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">分享你的痛點，獲得 20 痛痛幣</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="mb-6 grid gap-3 rounded-lg border border-stone-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-wrap gap-2">
+            {categories.map((item) => (
+              <button
+                key={item}
+                onClick={() => {
+                  setCategory(item);
+                  setTag("");
+                }}
+                className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                  category === item && !tag ? "bg-orange-500 text-white" : "bg-stone-100 text-stone-700 hover:bg-amber-100"
+                }`}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-col gap-3 md:flex-row">
             <input
-              type="text"
-              placeholder="痛點標題"
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-              required
-              className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-300"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="搜尋痛點、標籤或發問者"
+              className="min-h-11 flex-1 rounded-lg border border-stone-300 px-3 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
             />
-            <textarea
-              placeholder="描述你的痛點..."
-              value={form.content}
-              onChange={(e) => setForm({ ...form, content: e.target.value })}
-              required
-              rows={3}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-300"
-            />
+            <div className="flex rounded-lg bg-stone-100 p-1">
+              {(["熱門", "最新"] as const).map((item) => (
+                <button
+                  key={item}
+                  onClick={() => setSortMode(item)}
+                  className={`rounded-md px-4 py-2 text-sm font-semibold ${sortMode === item ? "bg-white text-orange-600 shadow-sm" : "text-stone-600"}`}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          </div>
+          {tag ? (
+            <button onClick={() => setTag("")} className="w-fit rounded-full bg-amber-100 px-3 py-1 text-sm text-amber-800">
+              標籤：{tag} x
+            </button>
+          ) : null}
+        </div>
+
+        <form className="mb-6 grid gap-3 rounded-lg border border-orange-200 bg-white p-4 shadow-sm">
+          <h2 className="text-lg font-bold">發布你的痛點</h2>
+          <div className="grid gap-3 md:grid-cols-[1fr_180px]">
+            <input className="rounded-lg border border-stone-300 px-3 py-2 outline-none focus:border-orange-500" placeholder="痛點標題" />
             <select
-              value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-300"
+              value={formCategory}
+              onChange={(event) => setFormCategory(event.target.value as PainPoint["category"])}
+              className="rounded-lg border border-stone-300 px-3 py-2 outline-none focus:border-orange-500"
             >
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>{c}</option>
+              {categories.filter((item) => item !== "全部").map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
               ))}
             </select>
-            {message && <p className="text-sm text-orange-600">{message}</p>}
-            <button
-              type="submit"
-              disabled={submitting}
-              className="bg-orange-500 text-white px-6 py-2 rounded-xl hover:bg-orange-600 disabled:opacity-50"
-            >
-              {submitting ? '提交中...' : '提交痛點'}
-            </button>
-          </form>
-        </div>
+          </div>
+          <textarea className="min-h-24 rounded-lg border border-stone-300 px-3 py-2 outline-none focus:border-orange-500" placeholder="描述目前流程、卡點與希望達成的結果" />
+          <button type="button" className="w-fit rounded-lg bg-orange-500 px-5 py-2 font-semibold text-white hover:bg-orange-600">
+            發布並領取 +20 痛痛幣
+          </button>
+        </form>
 
-        {/* Pain Points List */}
-        <div className="space-y-4">
-          {painPoints.map((pp) => (
-            <div key={pp.id} className="bg-white rounded-xl shadow-sm p-5">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${CATEGORY_COLORS[pp.category] ?? 'bg-gray-100 text-gray-700'}`}>
-                      {pp.category}
-                    </span>
-                    <h3 className="font-semibold text-gray-800">{pp.title}</h3>
+        {filtered.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-stone-300 bg-white p-10 text-center text-stone-500">找不到結果</div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {filtered.map((item) => (
+              <article key={item.id} className="flex flex-col rounded-lg border border-stone-200 bg-white p-5 shadow-sm">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <span className="text-sm font-medium text-stone-600">{item.poster}</span>
+                  <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">{item.category}</span>
+                </div>
+                <h3 className="text-xl font-bold">{item.title}</h3>
+                <p className="mt-2 line-clamp-3 text-sm leading-6 text-stone-600">{item.description}</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {item.tags.map((itemTag) => (
+                    <button key={itemTag} onClick={() => selectTag(itemTag)} className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-700 hover:bg-orange-100 hover:text-orange-700">
+                      #{itemTag}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-auto flex items-center justify-between gap-3 pt-5">
+                  <div className="text-sm text-stone-500">
+                    <span className="font-semibold text-stone-800">{item.likes}</span> 喜歡 · <span className="font-semibold text-stone-800">{item.comments}</span> 回覆
                   </div>
-                  <p className="text-sm text-gray-600">{pp.content}</p>
+                  <button className="rounded-lg bg-orange-500 px-3 py-2 text-sm font-semibold text-white hover:bg-orange-600">回覆賺幣 +50💡</button>
                 </div>
-                <div className="flex flex-col items-center gap-1">
-                  <button
-                    onClick={() => handleLike(pp.id)}
-                    className="bg-orange-100 text-orange-600 text-xs px-3 py-1.5 rounded-xl hover:bg-orange-200 transition"
-                  >
-                    我也有這個痛點
-                  </button>
-                  <span className="text-sm font-bold text-orange-500">{pp.likes} 人</span>
-                </div>
-              </div>
-            </div>
-          ))}
-          {painPoints.length === 0 && (
-            <p className="text-center text-gray-400 py-10">還沒有痛點，成為第一個分享的人！</p>
-          )}
-        </div>
-      </div>
-    </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+    </main>
   );
 }
