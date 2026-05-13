@@ -41,6 +41,7 @@ export default function Navbar() {
   const navLinks = [
     { href: '/pain-point-hub', label: '痛點中心' },
     { href: '/solution-gallery', label: 'AI解法實驗室' },
+    { href: '/barter-zone', label: '技能交換' },
     { href: '/tool-library', label: '工具箱' },
     { href: '/education', label: '學習轉運' },
     { href: '/honor-board', label: '榮譽榜' },
