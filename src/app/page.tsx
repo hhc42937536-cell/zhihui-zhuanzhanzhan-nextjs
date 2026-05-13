@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+
+export const dynamic = "force-static";
 
 const STATIC_PAIN_POINTS = [
   { rank: 1, title: "整理會議紀錄太耗時", hint: "語音轉文字 + AI 摘要", category: "工作", likes: 856 },
@@ -24,48 +25,9 @@ const TOOLS_DATA = [
   { tag: "數據分析", tagColor: "bg-red-100 text-red-600", hot: false, title: "訂單異常偵測小幫手", desc: "自動標記可疑訂單，降低風險", rating: 4.5, downloads: 856, coins: 30 },
 ];
 
-export default async function HomePage() {
-  let painPoints = STATIC_PAIN_POINTS;
-  let topUsers = STATIC_TOP_USERS;
-
-  try {
-    const supabase = await createClient();
-    const { data: dbPoints } = await supabase
-      .from("pain_points")
-      .select("id, title, likes, category")
-      .order("likes", { ascending: false })
-      .limit(5);
-    if (dbPoints && dbPoints.length > 0) {
-      painPoints = dbPoints.map((p, i) => ({
-        rank: i + 1,
-        title: p.title,
-        hint: "",
-        category: p.category ?? "",
-        likes: p.likes ?? 0,
-      }));
-    }
-
-    const { data: dbUsers } = await supabase
-      .from("users_profile")
-      .select("id, display_name, pain_coins")
-      .order("pain_coins", { ascending: false })
-      .limit(3);
-    if (dbUsers && dbUsers.length > 0) {
-      const colors = ["from-orange-400 to-orange-600", "from-amber-400 to-orange-500", "from-teal-400 to-teal-600"];
-      topUsers = dbUsers.map((u, i) => ({
-        name: u.display_name,
-        initial: u.display_name?.[0] ?? "?",
-        color: colors[i] ?? colors[0],
-        tps: u.pain_coins,
-        replies: 0,
-        likes: 0,
-        desc: "",
-        ring: i === 1,
-      }));
-    }
-  } catch {
-    // fallback to static data
-  }
+export default function HomePage() {
+  const painPoints = STATIC_PAIN_POINTS;
+  const topUsers = STATIC_TOP_USERS;
 
   return (
     <main className="min-h-screen bg-white text-gray-900">
