@@ -76,6 +76,12 @@ export const SOLUTIONS: Solution[] = [
   { id: 4, painPointId: 2, title: "持股新聞風險雷達", category: "投資分析", level: "intermediate", description: "用 RSS 與關鍵字監控持股新聞，每日輸出利多、利空與需要追蹤的財報日期。", tools: ["Perplexity", "Google Sheets", "Make"], tpsScore: 84, author: "價值派阿哲", likes: 241 },
   { id: 5, painPointId: 7, title: "零手貼週報自動化", category: "工作效率", level: "advanced", description: "串接廣告、CRM 與表單資料，排程清洗後自動產出週報摘要。", tools: ["Zapier", "Looker Studio", "ChatGPT"], tpsScore: 90, author: "Growth Leo", likes: 289 },
   { id: 6, painPointId: 10, title: "JD 對齊履歷改寫法", category: "溝通協作", level: "basic", description: "把職缺需求轉成能力清單，再對照經歷產出客製化摘要與面試故事。", tools: ["ChatGPT", "Google Docs"], tpsScore: 81, author: "Ellie", likes: 198 },
+  { id: 7, painPointId: 9, title: "Podcast 全自動後製流水線", category: "AI創作", level: "advanced", description: "Whisper 轉錄 → Claude 生成標題與摘要 → CapCut 批次剪輯沉默段 → 自動上傳 Spotify。", tools: ["Whisper", "Claude", "CapCut", "Make"], tpsScore: 93, author: "書瑋", likes: 321 },
+  { id: 8, painPointId: 4, title: "AI 客服信件標準化模板庫", category: "溝通協作", level: "intermediate", description: "建立 10 種情境回覆模板，用 AI 偵測信件情緒後自動套入適合模板，人工確認後送出。", tools: ["Claude", "Gmail", "Zapier"], tpsScore: 86, author: "Grace", likes: 234 },
+  { id: 9, painPointId: 15, title: "30 天短影音主題系統", category: "AI創作", level: "intermediate", description: "用 ChatGPT 生成主題矩陣 → 每支影片套入鉤子公式 → Notion 追蹤發布節奏與數據。", tools: ["ChatGPT", "Notion", "CapCut"], tpsScore: 82, author: "Vivi", likes: 219 },
+  { id: 10, painPointId: 13, title: "投資決策框架 Notion 模板", category: "投資分析", level: "basic", description: "建立買進/觀察/避開三欄資料庫，每次看報告時填入評分欄位，自動彙整成月度回顧。", tools: ["Notion", "ChatGPT"], tpsScore: 78, author: "股海小周", likes: 187 },
+  { id: 11, painPointId: 5, title: "發票自動 OCR 分類機器人", category: "工作效率", level: "advanced", description: "Line 拍照上傳 → Make 觸發 OCR → 自動分類至 Google Sheets 帳目，月底產出報稅用清單。", tools: ["Make", "Google Vision API", "Google Sheets", "Line"], tpsScore: 89, author: "Ken", likes: 267 },
+  { id: 12, painPointId: 17, title: "每日優先任務自動整合器", category: "工作效率", level: "intermediate", description: "抓取 Google Calendar、Notion 待辦與未讀郵件，用 AI 排優先序後推播到 Line Notify。", tools: ["Make", "ChatGPT", "Line Notify", "Google Calendar"], tpsScore: 85, author: "Serena", likes: 212 },
 ];
 
 export const TOOLS: Tool[] = [
@@ -87,6 +93,10 @@ export const TOOLS: Tool[] = [
   { id: 6, name: "Stock Radar Digest", category: "投資理財", pricing: "paid", description: "持股新聞與財報日期追蹤，生成每日投資風險摘要。", rating: 4.4, downloads: 7340, coins: 300, url: "https://example.com/stock-radar", createdAt: "2026-04-28" },
   { id: 7, name: "Podcast Clip Flow", category: "AI創作", pricing: "freemium", description: "逐字稿、亮點時間軸與短影音標題批次產生。", rating: 4.7, downloads: 11390, coins: 180, url: "https://example.com/podcast-flow", createdAt: "2026-04-26" },
   { id: 8, name: "Team Knowledge Search", category: "溝通協作", pricing: "paid", description: "把文件與 Slack 討論整理成可搜尋的內部問答入口。", rating: 4.8, downloads: 8890, coins: 340, url: "https://example.com/team-search", createdAt: "2026-04-24" },
+  { id: 9, name: "Invoice OCR Sorter", category: "數據分析", pricing: "free", description: "手機拍發票上傳，自動辨識金額與類別，匯出報稅用試算表。", rating: 4.6, downloads: 9210, coins: 140, url: "https://example.com/invoice-ocr", createdAt: "2026-04-22" },
+  { id: 10, name: "Daily Priority Push", category: "工作效率", pricing: "freemium", description: "每日早上自動整合 Calendar、Notion 待辦、Email，推播今日三件大事。", rating: 4.7, downloads: 13580, coins: 200, url: "https://example.com/daily-priority", createdAt: "2026-04-20" },
+  { id: 11, name: "LinkedIn Post Wizard", category: "AI創作", pricing: "freemium", description: "輸入你的專業觀點，自動生成高互動 LinkedIn 貼文草稿，含鉤子與 CTA。", rating: 4.5, downloads: 10240, coins: 150, url: "https://example.com/linkedin-wizard", createdAt: "2026-04-18" },
+  { id: 12, name: "Investment Journal", category: "投資理財", pricing: "free", description: "Notion 投資決策記錄模板，含買進理由、停損點與季度回顧。", rating: 4.4, downloads: 6780, coins: 80, url: "https://example.com/investment-journal", createdAt: "2026-04-15" },
 ];
 
 export const SHOP_ITEMS: ShopItem[] = [
